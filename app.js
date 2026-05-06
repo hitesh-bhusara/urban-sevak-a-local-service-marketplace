@@ -782,11 +782,12 @@ app.post("/superadmin/approve/:id", async (req, res) => {
       console.error("Failed to send approval email:", emailErr);
     }
 
-    res.json({ msg: "Provider approved successfully" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+     res.redirect("/superadmin/dashboard");
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Server error");
+    }
+  });
 
 // POST /superadmin/reject/:id - Reject a provider
 app.post("/superadmin/reject/:id", async (req, res) => {
@@ -833,8 +834,9 @@ app.post("/superadmin/reject/:id", async (req, res) => {
       console.error("Failed to send rejection email:", emailErr);
     }
 
-    res.json({ msg: "Provider rejected" });
+    res.redirect("/superadmin/dashboard");
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).send("Server error");
   }
 });

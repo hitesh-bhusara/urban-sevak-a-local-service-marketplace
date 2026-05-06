@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>SuperAdmin Dashboard - URBAN SEVAK</title>
+      <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap"
+   rel="stylesheet">
+      <style>
+          :root {
+              --green: #00C46A;
+              --bg: #0A0B0F;
+              --bg2: #0F1117;
+              --surface: #1a1a27;
+              --border: rgba(255,255,255,0.07);
+              --text: #F0F1F5;
+              --text-muted: #7B8094;
+              --red: #E74C3C;
+              --yellow: #F39C12;
+          }
+
+          *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+          body {
+              font-family: 'DM Sans', sans-serif;
+              background: var(--bg);
+              color: var(--text);
+              min-height: 100vh;
+              padding: 20px;
+          }
+
+          .header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 20px 0;
+              border-bottom: 1px solid var(--border);
+              margin-bottom: 30px;
+          }
+
+          .header h1 {
+              font-family: 'Syne', sans-serif;
+              font-size: 24px;
+              font-weight: 800;
+          }
+
+          .header h1 span { color: var(--green); }
+
+          .logout-btn {
+              padding: 10px 20px;
+              background: var(--surface);
+              border: 1px solid var(--border);
+              color: var(--text);
+              border-radius: 8px;
+              cursor: pointer;
+              font-family: 'DM Sans', sans-serif;
+              text-decoration: none;
+          }
+
+          .logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+          .section {
+              background: var(--surface);
+              border: 1px solid var(--border);
+              border-radius: 14px;
+              padding: 24px;
+              margin-bottom: 30px;
+          }
+
+          .section h2 {
+              font-family: 'Syne', sans-serif;
+              font-size: 20px;
+              margin-bottom: 20px;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+          }
+
+          .badge {
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 12px;
+              font-weight: 600;
+          }
+
+          .badge-pending { background: rgba(243, 156, 18, 0.2); color: var(--yellow); }
+          .badge-approved { background: rgba(0, 196, 106, 0.2); color: var(--green); }
+          .badge-rejected { background: rgba(231, 76, 60, 0.2); color: var(--red); }
+
+          .provider-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+              gap: 20px;
+          }
+
+          .provider-card {
+              background: var(--bg2);
+              border: 1px solid var(--border);
+              border-radius: 10px;
+              padding: 20px;
+          }
+
+          .provider-card h3 {
+              font-family: 'Syne', sans-serif;
+              font-size: 18px;
+              margin-bottom: 10px;
+          }
+
+          .provider-card p {
+              color: var(--text-muted);
+              font-size: 14px;
+              margin-bottom: 5px;
+          }
+
+          .provider-card .services {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 5px;
+              margin: 10px 0;
+          }
+
+          .service-tag {
+              padding: 4px 10px;
+              background: rgba(0, 196, 106, 0.1);
+              border-radius: 20px;
+              font-size: 12px;
+              color: var(--green);
+          }
+
+          .actions {
+              display: flex;
+              gap: 10px;
+              margin-top: 15px;
+              flex-wrap: wrap;
+          }
+
+          .btn {
+              padding: 8px 16px;
+              border: none;
+              border-radius: 6px;
+              font-size: 14px;
+              font-weight: 600;
+              cursor: pointer;
+              font-family: 'DM Sans', sans-serif;
+          }
+
+          .btn-approve { background: var(--green); color: #000; }
+          .btn-reject { background: var(--red); color: white; }
+          .btn-approve:hover { background: #00d975; }
+          .btn-reject:hover { background: #c0392b; }
+
+          .reject-form {
+              margin-top: 10px;
+              display: none;
+              gap: 10px;
+              flex-wrap: wrap;
+          }
+
+          .reject-form input {
+              flex: 1;
+              min-width: 200px;
+              padding: 8px 12px;
+              background: var(--bg);
+              border: 1px solid var(--border);
+              border-radius: 6px;
+              color: var(--text);
+              font-size: 14px;
+          }
+
+          .no-providers {
+              color: var(--text-muted);
+              font-style: italic;
+              padding: 20px 0;
+          }
+
+          .reason-text {
+              margin-top: 10px;
+              padding: 10px;
+              background: rgba(231, 76, 60, 0.1);
+              border-radius: 6px;
+              font-size: 14px;
+              color: var(--red);
+          }
+      </style>
+  </head>
+  <body>
+      <div class="header">
+          <h1>URBAN <span>SEVAK</span> - SuperAdmin Dashboard</h1>
+          <a href="/logout" class="logout-btn">Logout</a>
+      </div>
+
+      <!-- Pending Providers Section -->
+      <div class="section">
+          <h2>⏳ Pending Providers <span class="badge badge-pending"><%= pendingProviders.length %> pending</span></h2>
+          <% if (pendingProviders.length === 0) { %>
+              <p class="no-providers">No pending providers</p>
+          <% } else { %>
+              <div class="provider-grid">
+                  <% pendingProviders.forEach(provider => { %>
+                      <div class="provider-card">
+                          <h3><%= provider.name %></h3>
+                          <p>📧 <%= provider.email %></p>
+                          <p>📞 <%= provider.phone %></p>
+                          <p>📍 <%= provider.address %></p>
+                          <p>🛠️ Experience: <%= provider.experience %> years</p>
+                          <p>📦 Category: <%= provider.category %></p>
+
+                          <div class="services">
+                              <% provider.services.forEach(service => { %>
+                                  <span class="service-tag"><%= service %></span>
+                              <% }) %>
+                          </div>
+
+                          <div class="actions">
+                              <form action="/superadmin/approve/<%= provider._id %>" method="POST" style="display:inline;">
+                                  <button type="submit" class="btn btn-approve">✅ Approve</button>
+                              </form>
+                              <button type="button" class="btn btn-reject" onclick="toggleRejectForm('<%= provider._id %>')">❌ Reject</button>
+                          </div>
+
+                          <form id="reject-form-<%= provider._id %>" class="reject-form" action="/superadmin/reject/<%= provider._id %>" method="POST">      
+                              <input type="text" name="reason" placeholder="Enter rejection reason..." required>
+                              <button type="submit" class="btn btn-reject">Submit Rejection</button>
+                              <button type="button" class="btn" onclick="toggleRejectForm('<%= provider._id %>')" style="background: var(--border); color:   
+  var(--text);">Cancel</button>
+                          </form>
+                      </div>
+                  <% }) %>
+              </div>
+          <% } %>
+      </div>
+
+      <!-- Approved Providers Section -->
+      <div class="section">
+          <h2>✅ Approved Providers <span class="badge badge-approved"><%= approvedProviders.length %> approved</span></h2>
+          <% if (approvedProviders.length === 0) { %>
+              <p class="no-providers">No approved providers</p>
+          <% } else { %>
+              <div class="provider-grid">
+                  <% approvedProviders.forEach(provider => { %>
+                      <div class="provider-card">
+                          <h3><%= provider.name %></h3>
+                          <p>📧 <%= provider.email %></p>
+                          <p>📞 <%= provider.phone %></p>
+                          <p>🛠️ Services: <%= provider.services.join(", ") %></p>
+                          <p>⭐ Rating: <%= provider.rating %> (<%= provider.totalReviews %> reviews)</p>
+                      </div>
+                  <% }) %>
+              </div>
+          <% } %>
+      </div>
+
+      <!-- Rejected Providers Section -->
+      <div class="section">
+          <h2>❌ Rejected Providers <span class="badge badge-rejected"><%= rejectedProviders.length %> rejected</span></h2>
+          <% if (rejectedProviders.length === 0) { %>
+              <p class="no-providers">No rejected providers</p>
+          <% } else { %>
+              <div class="provider-grid">
+                  <% rejectedProviders.forEach(provider => { %>
+                      <div class="provider-card">
+                          <h3><%= provider.name %></h3>
+                          <p>📧 <%= provider.email %></p>
+                          <p>📞 <%= provider.phone %></p>
+                          <p>🛠️ Services: <%= provider.services.join(", ") %></p>
+                          <div class="reason-text">
+                              <strong>Rejection Reason:</strong> <%= provider.rejectionReason || "No reason provided" %>
+                          </div>
+                      </div>
+                  <% }) %>
+              </div>
+          <% } %>
+      </div>
+
+      <script>
+          function toggleRejectForm(providerId) {
+              const form = document.getElementById(`reject-form-${providerId}`);
+              form.style.display = form.style.display === 'flex' ? 'none' : 'flex';
+          }
+      </script>
+  </body>
+  </html>
