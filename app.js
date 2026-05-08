@@ -37,7 +37,7 @@ app.set("view engine", "ejs");
 // Provider Authentication Middleware
 const authenticateToken = async (req, res, next) => {
   try {
-    const token = req.cookies.token || (req.headers.authorization && req.headers.authorization.split(" ")[1]);
+    const token = req.cookies.provider_token || (req.headers.authorization && req.headers.authorization.split(" ")[1]);
     if (!token) {
       return res.redirect("/providerlogin");
     }
@@ -62,39 +62,46 @@ const authenticateToken = async (req, res, next) => {
 };
 
 // Redirect if already authenticated (for login/signup pages)
-const redirectIfAuthenticated = async (req, res, next) => {
-  try {
-    const token = req.cookies.token;
-    if (!token) return next();
+// role: "user", "provider", or "admin"
+const redirectIfAuthenticated = (role) => {
+  return async (req, res, next) => {
+    try {
+      let token;
+      if (role === "user") token = req.cookies.user_token;
+      else if (role === "provider") token = req.cookies.provider_token;
+      else if (role === "admin") token = req.cookies.admin_token;
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretkey");
+      if (!token) return next();
 
-    if (decoded.role === "user") {
-      const user = await User.findById(decoded.id);
-      if (user) return res.redirect("/home");
-    }
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretkey");
 
-    if (decoded.role === "provider") {
-      const provider = await Provider.findById(decoded.id);
-      if (provider && provider.status === "approved") {
-        return res.redirect("/provideradmin");
+      if (role === "user" && decoded.role === "user") {
+        const user = await User.findById(decoded.id);
+        if (user) return res.redirect("/home");
       }
-    }
 
-    if (decoded.role === "superadmin") {
-      return res.redirect("/superadmin/dashboard");
-    }
+      if (role === "provider" && decoded.role === "provider") {
+        const provider = await Provider.findById(decoded.id);
+        if (provider && provider.status === "approved") {
+          return res.redirect("/provideradmin");
+        }
+      }
 
-    next();
-  } catch (err) {
-    next();
-  }
+      if (role === "admin" && decoded.role === "superadmin") {
+        return res.redirect("/superadmin/dashboard");
+      }
+
+      next();
+    } catch (err) {
+      next();
+    }
+  };
 };
 
 // User Authentication Middleware
 const authenticateUser = async (req, res, next) => {
   try {
-    const token = req.cookies.token || (req.headers.authorization && req.headers.authorization.split(" ")[1]);
+    const token = req.cookies.user_token || (req.headers.authorization && req.headers.authorization.split(" ")[1]);
     if (!token) {
       return res.redirect("/login");
     }
@@ -128,23 +135,23 @@ app.get("/home", authenticateUser, (req, res) => {
   res.render("home", { categories });
 });
 
-app.get("/signup", redirectIfAuthenticated, (req, res) => {
+app.get("/signup", redirectIfAuthenticated("user"), (req, res) => {
   res.render("signup");
 });
 
-app.get("/login", redirectIfAuthenticated, (req, res) => {
+app.get("/login", redirectIfAuthenticated("user"), (req, res) => {
   res.render("login");
 });
 
-app.get("/signupas", redirectIfAuthenticated, (req, res) => {
+app.get("/signupas", (req, res) => {
   res.render("signupas");
 });
 
-app.get("/sprovidersignup", redirectIfAuthenticated, (req, res) => {
+app.get("/sprovidersignup", redirectIfAuthenticated("provider"), (req, res) => {
   res.render("sprovidersignup");
 });
 
-app.get("/providerlogin", redirectIfAuthenticated, (req, res) => {
+app.get("/providerlogin", redirectIfAuthenticated("provider"), (req, res) => {
   res.render("providerlogin");
 });
 
@@ -175,7 +182,7 @@ app.get("/providers", async (req, res) => {
     // Check if user is authenticated
     let user = null;
     try {
-      const token = req.cookies.token;
+      const token = req.cookies.user_token;
       if (token) {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretkey");
         if (decoded.role === "user") {
@@ -277,7 +284,7 @@ app.post("/signup", async (req, res) => {
     );
 
     // Set token in cookie
-    res.cookie("token", token, {
+    res.cookie("user_token", token, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
@@ -314,7 +321,7 @@ app.post("/login", async (req, res) => {
     );
 
     // Set token in cookie
-    res.cookie("token", token, {
+    res.cookie("user_token", token, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
@@ -351,7 +358,7 @@ app.post("/providerlogin", async (req, res) => {
     );
 
     // Set token in cookie
-    res.cookie("token", token, {
+    res.cookie("provider_token", token, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
@@ -437,18 +444,6 @@ app.post(
       // TODO: Send email todo SuperAdmin
 
       res.status(201).json({ msg: "Provider signup successful. Awaiting admin approval.", redirect: "/providerlogin" });
-      const token = jwt.sign(
-        { id: provider._id, role: "provider" },
-        process.env.JWT_SECRET || "secretkey",
-        { expiresIn: "7d" }
-      );
-
-      res.cookie("token", token, {
-        httpOnly: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-      });
-
-      res.status(201).json({ msg: "Provider signup successful", redirect: "/provideradmin" });
 
     } catch (err) {
       console.error(err);
@@ -708,9 +703,11 @@ app.get("/track-booking", authenticateUser, async (req, res) => {
   }
 });
 
-// GET /logout - Logout user and clear cookie
+// GET /logout - Logout user and clear all cookies
 app.get("/logout", (req, res) => {
-  res.clearCookie("token");
+  res.clearCookie("user_token");
+  res.clearCookie("provider_token");
+  res.clearCookie("admin_token");
   res.redirect("/");
 });
 
@@ -738,7 +735,7 @@ app.post("/superadmin/login", async (req, res) => {
       process.env.JWT_SECRET || "secretkey",
       { expiresIn: "7d" }
     );
-    res.cookie("token", token, {
+    res.cookie("admin_token", token, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
@@ -749,7 +746,7 @@ app.post("/superadmin/login", async (req, res) => {
 });
 
 // GET /superadmin - SuperAdmin login page
-app.get("/superadmin", redirectIfAuthenticated, (req, res) => {
+app.get("/superadmin", redirectIfAuthenticated("admin"), (req, res) => {
   res.render("superadmin-login");
 });
 
@@ -757,7 +754,7 @@ app.get("/superadmin", redirectIfAuthenticated, (req, res) => {
 app.get("/superadmin/dashboard", async (req, res) => {
   try {
     // Simple auth check (for now, just check if there's a valid admin token)
-    const token = req.cookies.token;
+    const token = req.cookies.admin_token;
     if (!token) return res.redirect("/superadmin");
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretkey");
     if (decoded.role !== "superadmin") return res.redirect("/superadmin");
