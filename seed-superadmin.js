@@ -25,7 +25,7 @@
       });
 
       await admin.save();
-      console.log("✅ SuperAdmin created successfully!");
+      console.log("SuperAdmin created successfully!");
       console.log("Username: admin");
       console.log("Password: admin123");
       process.exit(0);

@@ -61,6 +61,36 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
+// Redirect if already authenticated (for login/signup pages)
+const redirectIfAuthenticated = async (req, res, next) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) return next();
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretkey");
+
+    if (decoded.role === "user") {
+      const user = await User.findById(decoded.id);
+      if (user) return res.redirect("/home");
+    }
+
+    if (decoded.role === "provider") {
+      const provider = await Provider.findById(decoded.id);
+      if (provider && provider.status === "approved") {
+        return res.redirect("/provideradmin");
+      }
+    }
+
+    if (decoded.role === "superadmin") {
+      return res.redirect("/superadmin/dashboard");
+    }
+
+    next();
+  } catch (err) {
+    next();
+  }
+};
+
 // User Authentication Middleware
 const authenticateUser = async (req, res, next) => {
   try {
@@ -98,23 +128,23 @@ app.get("/home", authenticateUser, (req, res) => {
   res.render("home", { categories });
 });
 
-app.get("/signup", (req, res) => {
+app.get("/signup", redirectIfAuthenticated, (req, res) => {
   res.render("signup");
 });
 
-app.get("/login", (req, res) => {
+app.get("/login", redirectIfAuthenticated, (req, res) => {
   res.render("login");
 });
 
-app.get("/signupas", (req, res) => {
+app.get("/signupas", redirectIfAuthenticated, (req, res) => {
   res.render("signupas");
 });
 
-app.get("/sprovidersignup", (req, res) => {
+app.get("/sprovidersignup", redirectIfAuthenticated, (req, res) => {
   res.render("sprovidersignup");
 });
 
-app.get("/providerlogin", (req, res) => {
+app.get("/providerlogin", redirectIfAuthenticated, (req, res) => {
   res.render("providerlogin");
 });
 
@@ -719,7 +749,7 @@ app.post("/superadmin/login", async (req, res) => {
 });
 
 // GET /superadmin - SuperAdmin login page
-app.get("/superadmin", (req, res) => {
+app.get("/superadmin", redirectIfAuthenticated, (req, res) => {
   res.render("superadmin-login");
 });
 
