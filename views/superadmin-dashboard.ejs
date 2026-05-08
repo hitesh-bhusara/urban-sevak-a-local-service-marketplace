@@ -1,281 +1,717 @@
 <!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>SuperAdmin Dashboard - URBAN SEVAK</title>
-      <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap"
-   rel="stylesheet">
-      <style>
-          :root {
-              --green: #00C46A;
-              --bg: #0A0B0F;
-              --bg2: #0F1117;
-              --surface: #1a1a27;
-              --border: rgba(255,255,255,0.07);
-              --text: #F0F1F5;
-              --text-muted: #7B8094;
-              --red: #E74C3C;
-              --yellow: #F39C12;
-          }
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperAdmin Dashboard - URBAN SEVAK</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #00C46A;
+            --green-dark: #009952;
+            --green-dim: rgba(0, 196, 106, 0.12);
+            --bg: #0A0B0F;
+            --bg2: #0F1117;
+            --surface: #1A1D27;
+            --surface2: #202432;
+            --border: rgba(255,255,255,0.07);
+            --border-hover: rgba(0, 196, 106, 0.4);
+            --text: #F0F1F5;
+            --text-muted: #7B8094;
+            --text-dim: #4A4F65;
+            --white: #fff;
+            --red: #E74C3C;
+            --red-dim: rgba(231, 76, 60, 0.15);
+            --yellow: #F39C12;
+            --yellow-dim: rgba(243, 156, 18, 0.15);
+            --radius: 14px;
+            --radius-sm: 8px;
+        }
 
-          *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-          body {
-              font-family: 'DM Sans', sans-serif;
-              background: var(--bg);
-              color: var(--text);
-              min-height: 100vh;
-              padding: 20px;
-          }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
 
-          .header {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              padding: 20px 0;
-              border-bottom: 1px solid var(--border);
-              margin-bottom: 30px;
-          }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
 
-          .header h1 {
-              font-family: 'Syne', sans-serif;
-              font-size: 24px;
-              font-weight: 800;
-          }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.35;
+        }
 
-          .header h1 span { color: var(--green); }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 40px 60px;
+            position: relative;
+            z-index: 1;
+        }
 
-          .logout-btn {
-              padding: 10px 20px;
-              background: var(--surface);
-              border: 1px solid var(--border);
-              color: var(--text);
-              border-radius: 8px;
-              cursor: pointer;
-              font-family: 'DM Sans', sans-serif;
-              text-decoration: none;
-          }
+        /* HEADER */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
 
-          .logout-btn:hover { border-color: var(--red); color: var(--red); }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
 
-          .section {
-              background: var(--surface);
-              border: 1px solid var(--border);
-              border-radius: 14px;
-              padding: 24px;
-              margin-bottom: 30px;
-          }
+        .header-logo {
+            height: 36px;
+            width: auto;
+        }
 
-          .section h2 {
-              font-family: 'Syne', sans-serif;
-              font-size: 20px;
-              margin-bottom: 20px;
-              display: flex;
-              align-items: center;
-              gap: 10px;
-          }
+        .header h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--white, #fff);
+            letter-spacing: -0.5px;
+        }
 
-          .badge {
-              padding: 4px 12px;
-              border-radius: 20px;
-              font-size: 12px;
-              font-weight: 600;
-          }
+        .header h1 span { color: var(--green); }
 
-          .badge-pending { background: rgba(243, 156, 18, 0.2); color: var(--yellow); }
-          .badge-approved { background: rgba(0, 196, 106, 0.2); color: var(--green); }
-          .badge-rejected { background: rgba(231, 76, 60, 0.2); color: var(--red); }
+        .logout-btn {
+            padding: 8px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
 
-          .provider-grid {
-              display: grid;
-              grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-              gap: 20px;
-          }
+        .logout-btn:hover { border-color: var(--red); color: var(--red); }
 
-          .provider-card {
-              background: var(--bg2);
-              border: 1px solid var(--border);
-              border-radius: 10px;
-              padding: 20px;
-          }
+        /* STATS BAR */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 36px;
+        }
 
-          .provider-card h3 {
-              font-family: 'Syne', sans-serif;
-              font-size: 18px;
-              margin-bottom: 10px;
-          }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: border-color 0.2s;
+        }
 
-          .provider-card p {
-              color: var(--text-muted);
-              font-size: 14px;
-              margin-bottom: 5px;
-          }
+        .stat-card:hover { border-color: rgba(255,255,255,0.12); }
 
-          .provider-card .services {
-              display: flex;
-              flex-wrap: wrap;
-              gap: 5px;
-              margin: 10px 0;
-          }
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
 
-          .service-tag {
-              padding: 4px 10px;
-              background: rgba(0, 196, 106, 0.1);
-              border-radius: 20px;
-              font-size: 12px;
-              color: var(--green);
-          }
+        .stat-icon.pending { background: var(--yellow-dim); }
+        .stat-icon.approved { background: var(--green-dim); }
+        .stat-icon.rejected { background: var(--red-dim); }
+        .stat-icon.total { background: rgba(123,128,148,0.12); }
 
-          .actions {
-              display: flex;
-              gap: 10px;
-              margin-top: 15px;
-              flex-wrap: wrap;
-          }
+        .stat-info h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1;
+        }
 
-          .btn {
-              padding: 8px 16px;
-              border: none;
-              border-radius: 6px;
-              font-size: 14px;
-              font-weight: 600;
-              cursor: pointer;
-              font-family: 'DM Sans', sans-serif;
-          }
+        .stat-info p {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 2px;
+        }
 
-          .btn-approve { background: var(--green); color: #000; }
-          .btn-reject { background: var(--red); color: white; }
-          .btn-approve:hover { background: #00d975; }
-          .btn-reject:hover { background: #c0392b; }
+        /* SECTION */
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            margin-bottom: 28px;
+        }
 
-          .reject-form {
-              margin-top: 10px;
-              display: none;
-              gap: 10px;
-              flex-wrap: wrap;
-          }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
 
-          .reject-form input {
-              flex: 1;
-              min-width: 200px;
-              padding: 8px 12px;
-              background: var(--bg);
-              border: 1px solid var(--border);
-              border-radius: 6px;
-              color: var(--text);
-              font-size: 14px;
-          }
+        .section-header h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+        }
 
-          .no-providers {
-              color: var(--text-muted);
-              font-style: italic;
-              padding: 20px 0;
-          }
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
 
-          .reason-text {
-              margin-top: 10px;
-              padding: 10px;
-              background: rgba(231, 76, 60, 0.1);
-              border-radius: 6px;
-              font-size: 14px;
-              color: var(--red);
-          }
-      </style>
-  </head>
-  <body>
-      <div class="header">
-          <h1>URBAN <span>SEVAK</span> - SuperAdmin Dashboard</h1>
-          <a href="/logout" class="logout-btn">Logout</a>
-      </div>
+        .badge-pending { background: var(--yellow-dim); color: var(--yellow); }
+        .badge-approved { background: var(--green-dim); color: var(--green); }
+        .badge-rejected { background: var(--red-dim); color: var(--red); }
 
-      <!-- Pending Providers Section -->
-      <div class="section">
-          <h2>⏳ Pending Providers <span class="badge badge-pending"><%= pendingProviders.length %> pending</span></h2>
-          <% if (pendingProviders.length === 0) { %>
-              <p class="no-providers">No pending providers</p>
-          <% } else { %>
-              <div class="provider-grid">
-                  <% pendingProviders.forEach(provider => { %>
-                      <div class="provider-card">
-                          <h3><%= provider.name %></h3>
-                          <p>📧 <%= provider.email %></p>
-                          <p>📞 <%= provider.phone %></p>
-                          <p>📍 <%= provider.address %></p>
-                          <p>🛠️ Experience: <%= provider.experience %> years</p>
-                          <p>📦 Category: <%= provider.category %></p>
+        /* PROVIDER GRID */
+        .provider-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
 
-                          <div class="services">
-                              <% provider.services.forEach(service => { %>
-                                  <span class="service-tag"><%= service %></span>
-                              <% }) %>
-                          </div>
+        /* PROVIDER CARD */
+        .provider-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
 
-                          <div class="actions">
-                              <form action="/superadmin/approve/<%= provider._id %>" method="POST" style="display:inline;">
-                                  <button type="submit" class="btn btn-approve">✅ Approve</button>
-                              </form>
-                              <button type="button" class="btn btn-reject" onclick="toggleRejectForm('<%= provider._id %>')">❌ Reject</button>
-                          </div>
+        .provider-card:hover {
+            border-color: rgba(255,255,255,0.12);
+            transform: translateY(-2px);
+        }
 
-                          <form id="reject-form-<%= provider._id %>" class="reject-form" action="/superadmin/reject/<%= provider._id %>" method="POST">      
-                              <input type="text" name="reason" placeholder="Enter rejection reason..." required>
-                              <button type="submit" class="btn btn-reject">Submit Rejection</button>
-                              <button type="button" class="btn" onclick="toggleRejectForm('<%= provider._id %>')" style="background: var(--border); color:   
-  var(--text);">Cancel</button>
-                          </form>
-                      </div>
-                  <% }) %>
-              </div>
-          <% } %>
-      </div>
+        .card-top {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
 
-      <!-- Approved Providers Section -->
-      <div class="section">
-          <h2>✅ Approved Providers <span class="badge badge-approved"><%= approvedProviders.length %> approved</span></h2>
-          <% if (approvedProviders.length === 0) { %>
-              <p class="no-providers">No approved providers</p>
-          <% } else { %>
-              <div class="provider-grid">
-                  <% approvedProviders.forEach(provider => { %>
-                      <div class="provider-card">
-                          <h3><%= provider.name %></h3>
-                          <p>📧 <%= provider.email %></p>
-                          <p>📞 <%= provider.phone %></p>
-                          <p>🛠️ Services: <%= provider.services.join(", ") %></p>
-                          <p>⭐ Rating: <%= provider.rating %> (<%= provider.totalReviews %> reviews)</p>
-                      </div>
-                  <% }) %>
-              </div>
-          <% } %>
-      </div>
+        .card-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border);
+            background: var(--surface2);
+            flex-shrink: 0;
+        }
 
-      <!-- Rejected Providers Section -->
-      <div class="section">
-          <h2>❌ Rejected Providers <span class="badge badge-rejected"><%= rejectedProviders.length %> rejected</span></h2>
-          <% if (rejectedProviders.length === 0) { %>
-              <p class="no-providers">No rejected providers</p>
-          <% } else { %>
-              <div class="provider-grid">
-                  <% rejectedProviders.forEach(provider => { %>
-                      <div class="provider-card">
-                          <h3><%= provider.name %></h3>
-                          <p>📧 <%= provider.email %></p>
-                          <p>📞 <%= provider.phone %></p>
-                          <p>🛠️ Services: <%= provider.services.join(", ") %></p>
-                          <div class="reason-text">
-                              <strong>Rejection Reason:</strong> <%= provider.rejectionReason || "No reason provided" %>
-                          </div>
-                      </div>
-                  <% }) %>
-              </div>
-          <% } %>
-      </div>
+        .card-avatar-placeholder {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--surface2);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--text-dim);
+            flex-shrink: 0;
+        }
 
-      <script>
-          function toggleRejectForm(providerId) {
-              const form = document.getElementById(`reject-form-${providerId}`);
-              form.style.display = form.style.display === 'flex' ? 'none' : 'flex';
-          }
-      </script>
-  </body>
-  </html>
+        .card-name {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-name h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-name .card-email {
+            font-size: 13px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+
+        .card-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .card-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-detail svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+            color: var(--text-dim);
+        }
+
+        .card-detail span.val {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .card-services {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .service-tag {
+            padding: 4px 10px;
+            background: var(--green-dim);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--green);
+            font-weight: 500;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-approve {
+            background: var(--green);
+            color: #000;
+        }
+        .btn-approve:hover { background: #00d975; box-shadow: 0 0 12px rgba(0,196,106,0.3); }
+
+        .btn-reject {
+            background: rgba(231,76,60,0.15);
+            color: var(--red);
+            border: 1px solid rgba(231,76,60,0.2);
+        }
+        .btn-reject:hover { background: rgba(231,76,60,0.25); }
+
+        .btn-cancel {
+            background: var(--surface2);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        .btn-cancel:hover { border-color: rgba(255,255,255,0.15); }
+
+        /* REJECT FORM */
+        .reject-form {
+            margin-top: 14px;
+            padding: 16px;
+            background: var(--red-dim);
+            border: 1px solid rgba(231,76,60,0.2);
+            border-radius: var(--radius-sm);
+            display: none;
+            gap: 10px;
+            flex-wrap: wrap;
+            animation: slideDown 0.2s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .reject-form input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 14px;
+            background: var(--bg);
+            border: 1px solid rgba(231,76,60,0.3);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .reject-form input:focus {
+            border-color: var(--red);
+        }
+
+        .reject-form input::placeholder { color: var(--text-dim); }
+
+        /* APPROVED CARD SPECIFIC */
+        .card-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            color: var(--yellow);
+            font-weight: 600;
+        }
+
+        .card-rating span.muted {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* REJECTED CARD SPECIFIC */
+        .reason-box {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: var(--red-dim);
+            border: 1px solid rgba(231,76,60,0.2);
+            border-radius: var(--radius-sm);
+        }
+
+        .reason-box strong {
+            font-size: 12px;
+            color: var(--red);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .reason-box p {
+            font-size: 13px;
+            color: var(--text);
+            margin-top: 4px;
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-dim);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* AADHAAR IMAGE */
+        .aadhaar-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: var(--green);
+            text-decoration: none;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+        .aadhaar-link:hover { text-decoration: underline; }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .container { padding: 20px 16px 40px; }
+            .header h1 { font-size: 20px; }
+            .stats-bar { grid-template-columns: repeat(2, 1fr); }
+            .provider-grid { grid-template-columns: 1fr; }
+            .section { padding: 20px; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-bar { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <img src="/assets/logo.png" alt="URBAN SEVAK" class="header-logo" onerror="this.style.display='none'">
+            <h1>URBAN <span>SEVAK</span> Admin</h1>
+        </div>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+
+    <!-- STATS BAR -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="stat-icon pending">&#9203;</div>
+            <div class="stat-info">
+                <h3><%= pendingProviders.length %></h3>
+                <p>Pending</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon approved">&#9989;</div>
+            <div class="stat-info">
+                <h3><%= approvedProviders.length %></h3>
+                <p>Approved</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon rejected">&#10060;</div>
+            <div class="stat-info">
+                <h3><%= rejectedProviders.length %></h3>
+                <p>Rejected</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon total">&#128101;</div>
+            <div class="stat-info">
+                <h3><%= pendingProviders.length + approvedProviders.length + rejectedProviders.length %></h3>
+                <p>Total Providers</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PENDING PROVIDERS -->
+    <div class="section">
+        <div class="section-header">
+            <h2>&#9203; Pending Providers</h2>
+            <span class="badge badge-pending"><%= pendingProviders.length %> pending</span>
+        </div>
+
+        <% if (pendingProviders.length === 0) { %>
+            <div class="empty-state">
+                <div class="empty-icon">&#128640;</div>
+                <p>No pending providers at the moment.</p>
+            </div>
+        <% } else { %>
+            <div class="provider-grid">
+                <% pendingProviders.forEach(provider => { %>
+                    <div class="provider-card">
+                        <div class="card-top">
+                            <% if (provider.profileImage) { %>
+                                <img class="card-avatar" src="/uploads/<%= provider.profileImage %>" alt="<%= provider.name %>" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                                <div class="card-avatar-placeholder" style="display:none;">&#128100;</div>
+                            <% } else { %>
+                                <div class="card-avatar-placeholder">&#128100;</div>
+                            <% } %>
+                            <div class="card-name">
+                                <h3><%= provider.name %></h3>
+                                <div class="card-email"><%= provider.email %></div>
+                            </div>
+                        </div>
+
+                        <div class="card-details">
+                            <div class="card-detail">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                                <span class="val"><%= provider.phone %></span>
+                            </div>
+                            <div class="card-detail">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                <span class="val"><%= provider.address %></span>
+                            </div>
+                            <div class="card-detail">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+                                <span class="val">Experience: <%= provider.experience %> years</span>
+                            </div>
+                            <div class="card-detail">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+                                <span class="val">Category: <%= provider.category %></span>
+                            </div>
+                            <% if (provider.aadhaarImage) { %>
+                                <a class="aadhaar-link" href="/uploads/<%= provider.aadhaarImage %>" target="_blank">&#128247; View Aadhaar</a>
+                            <% } %>
+                        </div>
+
+                        <div class="card-services">
+                            <% provider.services.forEach(service => { %>
+                                <span class="service-tag"><%= service %></span>
+                            <% }) %>
+                        </div>
+
+                        <div class="card-actions">
+                            <form action="/superadmin/approve/<%= provider._id %>" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-approve">&#9989; Approve</button>
+                            </form>
+                            <button type="button" class="btn btn-reject" onclick="toggleRejectForm('<%= provider._id %>')">&#10060; Reject</button>
+                        </div>
+
+                        <form id="reject-form-<%= provider._id %>" class="reject-form" action="/superadmin/reject/<%= provider._id %>" method="POST">
+                            <input type="text" name="reason" placeholder="Enter rejection reason..." required>
+                            <button type="submit" class="btn btn-reject">Submit</button>
+                            <button type="button" class="btn btn-cancel" onclick="toggleRejectForm('<%= provider._id %>')">Cancel</button>
+                        </form>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- APPROVED PROVIDERS -->
+    <div class="section">
+        <div class="section-header">
+            <h2>&#9989; Approved Providers</h2>
+            <span class="badge badge-approved"><%= approvedProviders.length %> approved</span>
+        </div>
+
+        <% if (approvedProviders.length === 0) { %>
+            <div class="empty-state">
+                <div class="empty-icon">&#128188;</div>
+                <p>No approved providers yet.</p>
+            </div>
+        <% } else { %>
+            <div class="provider-grid">
+                <% approvedProviders.forEach(provider => { %>
+                    <div class="provider-card">
+                        <div class="card-top">
+                            <% if (provider.profileImage) { %>
+                                <img class="card-avatar" src="/uploads/<%= provider.profileImage %>" alt="<%= provider.name %>" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                                <div class="card-avatar-placeholder" style="display:none;">&#128100;</div>
+                            <% } else { %>
+                                <div class="card-avatar-placeholder">&#128100;</div>
+                            <% } %>
+                            <div class="card-name">
+                                <h3><%= provider.name %></h3>
+                                <div class="card-email"><%= provider.email %></div>
+                            </div>
+                        </div>
+
+                        <div class="card-details">
+                            <div class="card-detail">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                                <span class="val"><%= provider.phone %></span>
+                            </div>
+                            <div class="card-detail">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                <span class="val"><%= provider.address %></span>
+                            </div>
+                            <div class="card-detail">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+                                <span class="val">Services: <%= provider.services.join(", ") %></span>
+                            </div>
+                        </div>
+
+                        <div class="card-rating">
+                            &#11088; <span class="val"><%= provider.rating || 0 %></span>
+                            <span class="muted">(<%= provider.totalReviews || 0 %> reviews)</span>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- REJECTED PROVIDERS -->
+    <div class="section">
+        <div class="section-header">
+            <h2>&#10060; Rejected Providers</h2>
+            <span class="badge badge-rejected"><%= rejectedProviders.length %> rejected</span>
+        </div>
+
+        <% if (rejectedProviders.length === 0) { %>
+            <div class="empty-state">
+                <div class="empty-icon">&#127881;</div>
+                <p>No rejected providers.</p>
+            </div>
+        <% } else { %>
+            <div class="provider-grid">
+                <% rejectedProviders.forEach(provider => { %>
+                    <div class="provider-card">
+                        <div class="card-top">
+                            <% if (provider.profileImage) { %>
+                                <img class="card-avatar" src="/uploads/<%= provider.profileImage %>" alt="<%= provider.name %>" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                                <div class="card-avatar-placeholder" style="display:none;">&#128100;</div>
+                            <% } else { %>
+                                <div class="card-avatar-placeholder">&#128100;</div>
+                            <% } %>
+                            <div class="card-name">
+                                <h3><%= provider.name %></h3>
+                                <div class="card-email"><%= provider.email %></div>
+                            </div>
+                        </div>
+
+                        <div class="card-details">
+                            <div class="card-detail">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                                <span class="val"><%= provider.phone %></span>
+                            </div>
+                            <div class="card-detail">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                <span class="val"><%= provider.address %></span>
+                            </div>
+                            <div class="card-detail">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+                                <span class="val">Services: <%= provider.services.join(", ") %></span>
+                            </div>
+                        </div>
+
+                        <div class="reason-box">
+                            <strong>Rejection Reason:</strong>
+                            <p><%= provider.rejectionReason || "No reason provided" %></p>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+    function toggleRejectForm(providerId) {
+        const form = document.getElementById(`reject-form-${providerId}`);
+        form.style.display = form.style.display === 'flex' ? 'none' : 'flex';
+    }
+</script>
+</body>
+</html>
