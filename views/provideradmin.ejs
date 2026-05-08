@@ -512,7 +512,7 @@
             <div class="profile-card">
                 <div class="profile-header">
                     <% if (provider.profileImage) { %>
-                        <img src="/uploads/<%= provider.profileImage %>" alt="<%= provider.name %>" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid rgba(0,196,106,0.3);margin:0 auto 12px;">
+                        <img src="<%= provider.profileImage && provider.profileImage.startsWith('http') ? provider.profileImage : '/uploads/' + provider.profileImage %>" alt="<%= provider.name %>" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid rgba(0,196,106,0.3);margin:0 auto 12px;">
                     <% } else { %>
                         <div class="profile-avatar">👤</div>
                     <% } %>

@@ -59,7 +59,6 @@
             z-index: 1;
         }
 
-        /* HEADER */
         .header {
             display: flex;
             align-items: center;
@@ -86,7 +85,7 @@
             font-family: 'Syne', sans-serif;
             font-size: 24px;
             font-weight: 800;
-            color: var(--white, #fff);
+            color: var(--white);
             letter-spacing: -0.5px;
         }
 
@@ -108,7 +107,6 @@
 
         .logout-btn:hover { border-color: var(--red); color: var(--red); }
 
-        /* STATS BAR */
         .stats-bar {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -160,7 +158,6 @@
             margin-top: 2px;
         }
 
-        /* SECTION */
         .section {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -198,14 +195,12 @@
         .badge-approved { background: var(--green-dim); color: var(--green); }
         .badge-rejected { background: var(--red-dim); color: var(--red); }
 
-        /* PROVIDER GRID */
         .provider-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 20px;
         }
 
-        /* PROVIDER CARD */
         .provider-card {
             background: var(--bg2);
             border: 1px solid var(--border);
@@ -359,7 +354,6 @@
         }
         .btn-cancel:hover { border-color: rgba(255,255,255,0.15); }
 
-        /* REJECT FORM */
         .reject-form {
             margin-top: 14px;
             padding: 16px;
@@ -397,7 +391,6 @@
 
         .reject-form input::placeholder { color: var(--text-dim); }
 
-        /* APPROVED CARD SPECIFIC */
         .card-rating {
             display: flex;
             align-items: center;
@@ -412,7 +405,6 @@
             font-weight: 400;
         }
 
-        /* REJECTED CARD SPECIFIC */
         .reason-box {
             margin-top: 12px;
             padding: 12px 16px;
@@ -434,7 +426,6 @@
             margin-top: 4px;
         }
 
-        /* EMPTY STATE */
         .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -452,7 +443,6 @@
             color: var(--text-muted);
         }
 
-        /* AADHAAR IMAGE */
         .aadhaar-link {
             display: inline-flex;
             align-items: center;
@@ -465,7 +455,6 @@
         }
         .aadhaar-link:hover { text-decoration: underline; }
 
-        /* RESPONSIVE */
         @media (max-width: 768px) {
             .container { padding: 20px 16px 40px; }
             .header h1 { font-size: 20px; }
@@ -482,7 +471,6 @@
 <body>
 
 <div class="container">
-    <!-- HEADER -->
     <div class="header">
         <div class="header-left">
             <img src="/assets/logo.png" alt="URBAN SEVAK" class="header-logo" onerror="this.style.display='none'">
@@ -491,7 +479,6 @@
         <a href="/logout" class="logout-btn">Logout</a>
     </div>
 
-    <!-- STATS BAR -->
     <div class="stats-bar">
         <div class="stat-card">
             <div class="stat-icon pending">&#9203;</div>
@@ -523,7 +510,7 @@
         </div>
     </div>
 
-    <!-- PENDING PROVIDERS -->
+    <!-- Pending Providers -->
     <div class="section">
         <div class="section-header">
             <h2>&#9203; Pending Providers</h2>
@@ -541,7 +528,7 @@
                     <div class="provider-card">
                         <div class="card-top">
                             <% if (provider.profileImage) { %>
-                                <img class="card-avatar" src="/uploads/<%= provider.profileImage %>" alt="<%= provider.name %>" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                                <img class="card-avatar" src="<%= provider.profileImage && provider.profileImage.startsWith('http') ? provider.profileImage : '/uploads/' + provider.profileImage %>" alt="<%= provider.name %>" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
                                 <div class="card-avatar-placeholder" style="display:none;">&#128100;</div>
                             <% } else { %>
                                 <div class="card-avatar-placeholder">&#128100;</div>
@@ -570,7 +557,7 @@
                                 <span class="val">Category: <%= provider.category %></span>
                             </div>
                             <% if (provider.aadhaarImage) { %>
-                                <a class="aadhaar-link" href="/uploads/<%= provider.aadhaarImage %>" target="_blank">&#128247; View Aadhaar</a>
+                                <a class="aadhaar-link" href="<%= provider.aadhaarImage && provider.aadhaarImage.startsWith('http') ? provider.aadhaarImage : '/uploads/' + provider.aadhaarImage %>" target="_blank">&#128247; View Aadhaar</a>
                             <% } %>
                         </div>
 
@@ -598,7 +585,7 @@
         <% } %>
     </div>
 
-    <!-- APPROVED PROVIDERS -->
+    <!-- Approved Providers -->
     <div class="section">
         <div class="section-header">
             <h2>&#9989; Approved Providers</h2>
@@ -616,7 +603,7 @@
                     <div class="provider-card">
                         <div class="card-top">
                             <% if (provider.profileImage) { %>
-                                <img class="card-avatar" src="/uploads/<%= provider.profileImage %>" alt="<%= provider.name %>" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                                <img class="card-avatar" src="<%= provider.profileImage && provider.profileImage.startsWith('http') ? provider.profileImage : '/uploads/' + provider.profileImage %>" alt="<%= provider.name %>" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
                                 <div class="card-avatar-placeholder" style="display:none;">&#128100;</div>
                             <% } else { %>
                                 <div class="card-avatar-placeholder">&#128100;</div>
@@ -652,7 +639,7 @@
         <% } %>
     </div>
 
-    <!-- REJECTED PROVIDERS -->
+    <!-- Rejected Providers -->
     <div class="section">
         <div class="section-header">
             <h2>&#10060; Rejected Providers</h2>
@@ -670,7 +657,7 @@
                     <div class="provider-card">
                         <div class="card-top">
                             <% if (provider.profileImage) { %>
-                                <img class="card-avatar" src="/uploads/<%= provider.profileImage %>" alt="<%= provider.name %>" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                                <img class="card-avatar" src="<%= provider.profileImage && provider.profileImage.startsWith('http') ? provider.profileImage : '/uploads/' + provider.profileImage %>" alt="<%= provider.name %>" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
                                 <div class="card-avatar-placeholder" style="display:none;">&#128100;</div>
                             <% } else { %>
                                 <div class="card-avatar-placeholder">&#128100;</div>

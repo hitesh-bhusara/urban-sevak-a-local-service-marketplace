@@ -14,7 +14,24 @@ const Provider = require("./models/serviceprovider");
 const Booking = require("./models/booking");
 const SuperAdmin = require("./models/superadmin");
 const nodemailer = require("nodemailer");
+const cloudinary = require("./config/cloudinary");
 const { categories, getCategoryFromServices } = require("./config/serviceCategories");
+
+// Helper: upload a file buffer to Cloudinary and return the secure URL
+const uploadToCloudinary = (file, folder) => {
+  return new Promise((resolve, reject) => {
+    const b64 = Buffer.from(file.buffer).toString("base64");
+    const dataURI = `data:${file.mimetype};base64,${b64}`;
+    cloudinary.uploader.upload(
+      dataURI,
+      { folder: `urbansevak/${folder}` },
+      (err, result) => {
+        if (err) reject(err);
+        else resolve(result.secure_url);
+      }
+    );
+  });
+};
 
 // Email Transporter (Gmail)
 const transporter = nodemailer.createTransport({
@@ -402,11 +419,23 @@ app.post(
         return res.status(400).json({ msg: "Location required" });
       }
 
-      const aadhaarImage = req.files["aadhaarImage"]?.[0]?.filename;
-      const profileImage = req.files["profileImage"]?.[0]?.filename;
+      const aadhaarFile = req.files["aadhaarImage"]?.[0];
+      const profileFile = req.files["profileImage"]?.[0];
 
-      if (!aadhaarImage || !profileImage) {
+      if (!aadhaarFile || !profileFile) {
         return res.status(400).json({ msg: "Images required" });
+      }
+
+      // Upload images to Cloudinary
+      let aadhaarImageUrl, profileImageUrl;
+      try {
+        [aadhaarImageUrl, profileImageUrl] = await Promise.all([
+          uploadToCloudinary(aadhaarFile, "aadhaar"),
+          uploadToCloudinary(profileFile, "profiles")
+        ]);
+      } catch (uploadErr) {
+        console.error("Cloudinary upload failed:", uploadErr);
+        return res.status(500).json({ msg: "Image upload failed. Please try again." });
       }
 
       const existing = await Provider.findOne({ email });
@@ -429,8 +458,8 @@ app.post(
         services: servicesArray,
         experience: experience ? parseInt(experience) : 0,
         aadhaarNumber,
-        aadhaarImage,
-        profileImage,
+        aadhaarImage: aadhaarImageUrl,
+        profileImage: profileImageUrl,
         category, // Auto-assigned
         location: {
           type: "Point",

@@ -658,7 +658,7 @@
                     <div class="provider-card">
                         <div class="card-header">
                             <% if (p.profileImage) { %>
-                                <img class="card-avatar" src="/uploads/<%= p.profileImage %>" alt="<%= p.name %>">
+                                <img class="card-avatar" src="<%= p.profileImage && p.profileImage.startsWith('http') ? p.profileImage : '/uploads/' + p.profileImage %>" alt="<%= p.name %>">
                             <% } else { %>
                                 <div class="card-avatar-placeholder">&#128100;</div>
                             <% } %>
