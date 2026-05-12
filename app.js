@@ -214,9 +214,15 @@ app.get("/providers", async (req, res) => {
       return res.render("providers", { providers: [], category: null, lat: null, lng: null, user });
     }
 
-    // If no location provided, just filter by category
+    // Find the category object from the categories array
+    const catObj = categories.find(c => c.name === category);
+    if (!catObj) {
+      return res.render("providers", { providers: [], category, lat: null, lng: null, user });
+    }
+
+    // If no location provided, just filter by category (matching any service in the category)
     if (!lat || !lng) {
-      const providers = await Provider.find({ category });
+      const providers = await Provider.find({ services: { $in: catObj.services } });
       return res.render("providers", { providers, category, lat: null, lng: null, user });
     }
 
@@ -225,7 +231,7 @@ app.get("/providers", async (req, res) => {
 
     // Validate coordinates
     if (isNaN(userLat) || isNaN(userLng)) {
-      const providers = await Provider.find({ category });
+      const providers = await Provider.find({ services: { $in: catObj.services } });
       return res.render("providers", { providers, category, lat: null, lng: null, user });
     }
 
@@ -239,7 +245,7 @@ app.get("/providers", async (req, res) => {
           },
           distanceField: "distance",
           maxDistance: 10000, // 10km in meters
-          query: { category },
+          query: { services: { $in: catObj.services } },
           spherical: true
         }
       }
@@ -256,6 +262,11 @@ app.get("/providers", async (req, res) => {
 // Legacy route - redirect to new /providers route
 app.get("/providers/:category", (req, res) => {
   const category = req.params.category;
+  // Validate that the category exists
+  const catObj = categories.find(c => c.name === category);
+  if (!catObj) {
+    return res.status(404).send("Category not found");
+  }
   res.redirect(`/providers?category=${encodeURIComponent(category)}`);
 });
 
