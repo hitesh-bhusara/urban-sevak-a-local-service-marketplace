@@ -614,8 +614,12 @@
             <div class="nav-links" id="navLinks">
                 <a href="/">Home</a>
                 <a href="/track-booking">Track Booking</a>
-                <a href="/login">Log In</a>
-                <a href="/signupas">Sign Up</a>
+                <% if (user) { %>
+                    <a href="/logout">Log Out</a>
+                <% } else { %>
+                    <a href="/login">Log In</a>
+                    <a href="/signupas">Sign Up</a>
+                <% } %>
             </div>
             <div class="nav-btns">
                 <a href="/sprovidersignup" class="btn-ghost">Become a Provider</a>
@@ -720,7 +724,7 @@
                 <h4>For Customers</h4>
                 <ul>
                     <li><a href="/signupas">Sign Up</a></li>
-                    <li><a href="/login">Log In</a></li>
+                    <% if (!user) { %><li><a href="/login">Log In</a></li><% } %>
                     <li><a href="#">How it Works</a></li>
                     <li><a href="#">Safety Guide</a></li>
                 </ul>
@@ -752,7 +756,7 @@
                     <li><a href="#">FAQs</a></li>
                 </ul>
             </div>
-        </div>
+    </div>
         <div class="footer-bottom">
             <div class="footer-bottom-inner">
                 <div class="footer-brand">
