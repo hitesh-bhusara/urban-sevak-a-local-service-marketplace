@@ -143,7 +143,7 @@ Defined in `config/serviceCategories.js`:
 
 ### 4. Provider Discovery (Geospatial)
 - **Route:** `GET /providers?category=X&lat=Y&lng=Z`
-- Uses MongoDB `$geoNear` aggregation to find providers within **10km**
+- Uses MongoDB `$geoNear` aggregation to find providers within **50km**
 - Sorted by distance from user's location
 - Filters by category
 

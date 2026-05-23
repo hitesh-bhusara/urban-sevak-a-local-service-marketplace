@@ -3,7 +3,8 @@
     "allow": [
       "Bash(node -e ' *)",
       "Bash(node -c app.js)",
-      "Edit"
+      "Edit",
+      "Bash(node *)"
     ]
   }
 }

@@ -222,7 +222,10 @@ app.get("/providers", async (req, res) => {
 
     // If no location provided, just filter by category (matching any service in the category)
     if (!lat || !lng) {
-      const providers = await Provider.find({ services: { $in: catObj.services } });
+      const providers = await Provider.find({
+        services: { $in: catObj.services },
+        status: "approved"
+      });
       return res.render("providers", { providers, category, lat: null, lng: null, user });
     }
 
@@ -231,11 +234,14 @@ app.get("/providers", async (req, res) => {
 
     // Validate coordinates
     if (isNaN(userLat) || isNaN(userLng)) {
-      const providers = await Provider.find({ services: { $in: catObj.services } });
+      const providers = await Provider.find({
+        services: { $in: catObj.services },
+        status: "approved"
+      });
       return res.render("providers", { providers, category, lat: null, lng: null, user });
     }
 
-    // Use MongoDB geoNear aggregation to find providers within 10km, sorted by distance
+    // Use MongoDB geoNear aggregation to find providers within 50km, sorted by distance
     const providers = await Provider.aggregate([
       {
         $geoNear: {
@@ -244,8 +250,8 @@ app.get("/providers", async (req, res) => {
             coordinates: [userLng, userLat]
           },
           distanceField: "distance",
-          maxDistance: 10000, // 10km in meters
-          query: { services: { $in: catObj.services } },
+          maxDistance: 50000, // 50km in meters
+          query: { services: { $in: catObj.services }, status: "approved" },
           spherical: true
         }
       }
