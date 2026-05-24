@@ -13,6 +13,7 @@ const jwt = require("jsonwebtoken");
 const Provider = require("./models/serviceprovider");
 const Booking = require("./models/booking");
 const SuperAdmin = require("./models/superadmin");
+const Review = require("./models/review");
 const nodemailer = require("nodemailer");
 const cloudinary = require("./config/cloudinary");
 const { categories, getCategoryFromServices } = require("./config/serviceCategories");
@@ -738,14 +739,83 @@ app.get("/api/bookings-by-phone/:phone", async (req, res) => {
   }
 });
 
+// POST /api/reviews - Submit a review for a completed booking
+app.post("/api/reviews", authenticateUser, async (req, res) => {
+  try {
+    const { bookingId, rating, review } = req.body;
+
+    if (!bookingId || !rating) {
+      return res.status(400).json({ msg: "Booking ID and rating are required" });
+    }
+
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ msg: "Rating must be between 1 and 5" });
+    }
+
+    const booking = await Booking.findById(bookingId).populate('provider');
+    if (!booking) {
+      return res.status(404).json({ msg: "Booking not found" });
+    }
+
+    if (booking.status !== "completed") {
+      return res.status(400).json({ msg: "Only completed bookings can be reviewed" });
+    }
+
+    if (booking.customer && booking.customer.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ msg: "Not authorized to review this booking" });
+    }
+
+    const existingReview = await Review.findOne({ booking: bookingId, customer: req.user._id });
+    if (existingReview) {
+      return res.status(400).json({ msg: "Review already submitted for this booking" });
+    }
+
+    const newReview = new Review({
+      booking: bookingId,
+      provider: booking.provider._id,
+      customer: req.user._id,
+      rating,
+      review
+    });
+    await newReview.save();
+
+    const reviews = await Review.find({ provider: booking.provider._id });
+    const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+    const avgRating = totalRating / reviews.length;
+
+    const provider = await Provider.findById(booking.provider._id);
+    provider.rating = Math.round(avgRating * 10) / 10;
+    provider.totalReviews = reviews.length;
+    await provider.save();
+
+    res.status(201).json({ msg: "Review submitted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/provider/:providerId/reviews - Get all reviews for a provider
+app.get("/api/provider/:providerId/reviews", async (req, res) => {
+  try {
+    const reviews = await Review.find({ provider: req.params.providerId })
+      .populate('customer', 'name')
+      .sort({ createdAt: -1 });
+    res.json(reviews);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /track-booking - Customer booking status tracking page (protected)
 app.get("/track-booking", authenticateUser, async (req, res) => {
   try {
     const bookings = await Booking.find({ customer: req.user._id }).populate('provider').sort({ createdAt: -1 });
-    res.render("track-booking", { bookings });
+    const reviews = await Review.find({ customer: req.user._id });
+    res.render("track-booking", { bookings, reviews });
   } catch (err) {
     console.error(err);
-    res.render("track-booking", { bookings: [] });
+    res.render("track-booking", { bookings: [], reviews: [] });
   }
 });
 
