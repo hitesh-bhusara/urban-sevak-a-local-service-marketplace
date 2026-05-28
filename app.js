@@ -145,8 +145,32 @@ const authenticateUser = async (req, res, next) => {
 
 // GET ROUTES
 
-app.get("/", (req, res) => {
-  res.render("index", { categories });
+app.get("/", async (req, res) => {
+  let user = null, provider = null;
+
+  // Check user auth
+  try {
+    const userToken = req.cookies.user_token;
+    if (userToken) {
+      const decoded = jwt.verify(userToken, process.env.JWT_SECRET || "secretkey");
+      if (decoded.role === "user") {
+        user = await User.findById(decoded.id);
+      }
+    }
+  } catch (e) {}
+
+  // Check provider auth
+  try {
+    const providerToken = req.cookies.provider_token;
+    if (providerToken) {
+      const decoded = jwt.verify(providerToken, process.env.JWT_SECRET || "secretkey");
+      if (decoded.role === "provider") {
+        provider = await Provider.findById(decoded.id);
+      }
+    }
+  } catch (e) {}
+
+  res.render("index", { categories, user, provider });
 });
 
 app.get("/home", authenticateUser, (req, res) => {
@@ -198,11 +222,11 @@ app.get("/providers", async (req, res) => {
     const { category, lat, lng } = req.query;
 
     // Check if user is authenticated
-    let user = null;
+    let user = null, provider = null;
     try {
-      const token = req.cookies.user_token;
-      if (token) {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretkey");
+      const userToken = req.cookies.user_token;
+      if (userToken) {
+        const decoded = jwt.verify(userToken, process.env.JWT_SECRET || "secretkey");
         if (decoded.role === "user") {
           user = await User.findById(decoded.id);
         }
@@ -211,14 +235,25 @@ app.get("/providers", async (req, res) => {
       // User not authenticated, continue without user
     }
 
+    // Check if provider is authenticated
+    try {
+      const providerToken = req.cookies.provider_token;
+      if (providerToken) {
+        const decoded = jwt.verify(providerToken, process.env.JWT_SECRET || "secretkey");
+        if (decoded.role === "provider") {
+          provider = await Provider.findById(decoded.id);
+        }
+      }
+    } catch (e) {}
+
     if (!category) {
-      return res.render("providers", { providers: [], category: null, lat: null, lng: null, user });
+      return res.render("providers", { providers: [], category: null, lat: null, lng: null, user, provider });
     }
 
     // Find the category object from the categories array
     const catObj = categories.find(c => c.name === category);
     if (!catObj) {
-      return res.render("providers", { providers: [], category, lat: null, lng: null, user });
+      return res.render("providers", { providers: [], category, lat: null, lng: null, user, provider });
     }
 
     // If no location provided, just filter by category (matching any service in the category)
@@ -227,7 +262,7 @@ app.get("/providers", async (req, res) => {
         services: { $in: catObj.services },
         status: "approved"
       });
-      return res.render("providers", { providers, category, lat: null, lng: null, user });
+      return res.render("providers", { providers, category, lat: null, lng: null, user, provider });
     }
 
     const userLat = parseFloat(lat);
@@ -239,7 +274,7 @@ app.get("/providers", async (req, res) => {
         services: { $in: catObj.services },
         status: "approved"
       });
-      return res.render("providers", { providers, category, lat: null, lng: null, user });
+      return res.render("providers", { providers, category, lat: null, lng: null, user, provider });
     }
 
     // Use MongoDB geoNear aggregation to find providers within 50km, sorted by distance
@@ -258,7 +293,7 @@ app.get("/providers", async (req, res) => {
       }
     ]);
 
-    res.render("providers", { providers, category, lat: userLat, lng: userLng, user });
+    res.render("providers", { providers, category, lat: userLat, lng: userLng, user, provider });
 
   } catch (err) {
     console.error(err);
@@ -321,7 +356,8 @@ app.post("/signup", async (req, res) => {
     // Set token in cookie
     res.cookie("user_token", token, {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: "/"
     });
 
     res.status(201).json({ msg: "Signup successful", redirect: "/home" });
@@ -358,7 +394,8 @@ app.post("/login", async (req, res) => {
     // Set token in cookie
     res.cookie("user_token", token, {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: "/"
     });
 
     res.json({ msg: "Login successful", redirect: "/home" });
@@ -395,7 +432,8 @@ app.post("/providerlogin", async (req, res) => {
     // Set token in cookie
     res.cookie("provider_token", token, {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: "/"
     });
 
     res.json({ msg: "Login successful", redirect: "/provideradmin" });
@@ -821,10 +859,18 @@ app.get("/track-booking", authenticateUser, async (req, res) => {
 
 // GET /logout - Logout user and clear all cookies
 app.get("/logout", (req, res) => {
-  res.clearCookie("user_token");
-  res.clearCookie("provider_token");
-  res.clearCookie("admin_token");
-  res.redirect("/");
+  const hasProviderToken = !!req.cookies.provider_token;
+  res.clearCookie("user_token", { path: "/" });
+  res.clearCookie("provider_token", { path: "/" });
+  res.clearCookie("admin_token", { path: "/" });
+  // Redirect based on the cookie that was present (check before clearing)
+  res.redirect(hasProviderToken ? "/providerlogin" : "/");
+});
+
+// GET /providerlogout - Dedicated provider logout route
+app.get("/providerlogout", (req, res) => {
+  res.clearCookie("provider_token", { path: "/" });
+  res.redirect("/providerlogin");
 });
 
 app.listen(5000, () => console.log("Server running on port 5000"));
@@ -853,7 +899,8 @@ app.post("/superadmin/login", async (req, res) => {
     );
     res.cookie("admin_token", token, {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/"
     });
     res.json({ msg: "Login successful", redirect: "/superadmin/dashboard" });
   } catch (err) {

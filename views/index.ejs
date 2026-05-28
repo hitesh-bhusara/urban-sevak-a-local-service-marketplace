@@ -911,9 +911,14 @@
             </a>
             <div class="nav-links" id="navLinks">
                 <a href="/">Home</a>
-                <!-- <a href="/track-booking">Track Booking</a> -->
-                <a href="/login">Log In</a>
-                <a href="/signupas">Sign Up</a>
+                <% if (typeof provider !== 'undefined' && provider) { %>
+                    <a href="/providerlogout" class="btn-ghost">Log Out (Provider)</a>
+                <% } else if (typeof user !== 'undefined' && user) { %>
+                    <a href="/logout" class="btn-ghost">Log Out (User)</a>
+                <% } else { %>
+                    <a href="/login">Log In</a>
+                    <a href="/signupas">Sign Up</a>
+                <% } %>
             </div>
             <div class="nav-btns">
                 <a href="/sprovidersignup" class="btn-ghost">Become a Provider</a>

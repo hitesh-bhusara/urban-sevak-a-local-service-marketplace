@@ -614,8 +614,10 @@
             <div class="nav-links" id="navLinks">
                 <a href="/">Home</a>
                 <a href="/track-booking">Track Booking</a>
-                <% if (user) { %>
-                    <a href="/logout">Log Out</a>
+                <% if (provider) { %>
+                    <a href="/providerlogout">Log Out (Provider)</a>
+                <% } else if (user) { %>
+                    <a href="/logout">Log Out (User)</a>
                 <% } else { %>
                     <a href="/login">Log In</a>
                     <a href="/signupas">Sign Up</a>
@@ -724,7 +726,7 @@
                 <h4>For Customers</h4>
                 <ul>
                     <li><a href="/signupas">Sign Up</a></li>
-                    <% if (!user) { %><li><a href="/login">Log In</a></li><% } %>
+                    <% if (!provider && !user) { %><li><a href="/login">Log In</a></li><% } %>
                     <li><a href="#">How it Works</a></li>
                     <li><a href="#">Safety Guide</a></li>
                 </ul>
