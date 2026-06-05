@@ -324,8 +324,8 @@
         }
 
         async function submitReview(bookingId) {
-            const selectedStar = document.querySelector(`.rating-stars[data-booking="${bookingId}"] .star.active`);
-            const rating = selectedStar ? parseInt(selectedStar.dataset.rating) : 0;
+            const starsContainer = document.querySelector(`.rating-stars[data-booking="${bookingId}"]`);
+            const rating = starsContainer.dataset.selectedRating ? parseInt(starsContainer.dataset.selectedRating) : 0;
             const reviewText = document.getElementById(`review-text-${bookingId}`).value;
 
             if (rating === 0) {
@@ -357,6 +357,7 @@
                 starsContainer.addEventListener('click', function(e) {
                     if (e.target.classList.contains('star')) {
                         const rating = parseInt(e.target.dataset.rating);
+                        starsContainer.dataset.selectedRating = rating;
                         starsContainer.querySelectorAll('.star').forEach(function(star, idx) {
                             if (idx < rating) {
                                 star.classList.add('active');
